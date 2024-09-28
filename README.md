@@ -162,6 +162,142 @@ GET /api/v1/users
 ]
 ```
 
+
+## Database Design Schema
+
+### Database Name: `task_management`
+
+The system has two tables: `users` and `posts`, with a one-to-many relationship between them.
+
+### Table 1: `users`
+
+| Column          | Data Type       | Constraints                       |
+|-----------------|-----------------|-----------------------------------|
+| `id`            | BIGINT (PK)     | Primary Key, Auto-Increment       |
+| `email`         | VARCHAR(255)    | NOT NULL, Unique                  |
+| `password`      | VARCHAR(255)    | NOT NULL                          |
+
+**Description**:
+- The `users` table stores information about each user.
+- `id`: Primary key, auto-incremented.
+- `email`: Unique and not null, stores the user's email address.
+- `password`: Stores the user's password (hashed).
+
+#### SQL to Create `users` Table:
+```sql
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+```
+
+---
+
+### Table 2: `posts`
+
+| Column          | Data Type       | Constraints                                  |
+|-----------------|-----------------|----------------------------------------------|
+| `id`            | BIGINT (PK)     | Primary Key, Auto-Increment                  |
+| `title`         | VARCHAR(255)    | NOT NULL                                    |
+| `content`       | TEXT            | NOT NULL                                    |
+| `user_id`       | BIGINT (FK)     | Foreign Key references `users(id)`           |
+
+**Description**:
+- The `posts` table stores each post created by users.
+- `id`: Primary key, auto-incremented.
+- `title`: Title of the post.
+- `content`: Main body of the post.
+- `user_id`: Foreign key that references the `users` table to establish a relationship between posts and users.
+
+#### SQL to Create `posts` Table:
+```sql
+CREATE TABLE posts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+---
+
+### ER Diagram
+
+This is a simple representation of the one-to-many relationship between the `users` and `posts` tables.
+
+```
++--------------+        +------------+
+|   users      |        |   posts    |
++--------------+        +------------+
+| id (PK)      | 1    N | id (PK)    |
+| email        | ------ | title      |
+| password     |        | content    |
++--------------+        | user_id (FK)|
+                        +------------+
+```
+
+---
+
+## API Endpoints
+
+### Users
+
+- **GET /api/v1/users**: Retrieve a list of all users.
+- **GET /api/v1/users/{id}**: Retrieve a specific user by ID.
+- **POST /api/v1/users**: Create a new user.
+- **PUT /api/v1/users/{id}**: Update an existing user by ID.
+- **DELETE /api/v1/users/{id}**: Delete a user by ID.
+
+### Posts
+
+- **GET /api/v1/posts**: Retrieve a list of all posts.
+- **GET /api/v1/posts/{id}**: Retrieve a specific post by ID.
+- **POST /api/v1/posts**: Create a new post.
+- **PUT /api/v1/posts/{id}**: Update an existing post by ID.
+- **DELETE /api/v1/posts/{id}**: Delete a post by ID.
+
+---
+
+## Running the Application
+
+- Start the Spring Boot application using the following Maven command:
+    ```bash
+    mvn spring-boot:run
+    ```
+
+- Access the API at `http://localhost:8080/api/v1/users` and `http://localhost:8080/api/v1/posts`.
+
+- Ensure the MySQL database is up and running. The application will automatically create the tables based on the JPA entities.
+
+---
+
+### Additional Information
+
+- **CascadeType.ALL** ensures that when a user is deleted, all their associated posts are also deleted.
+- **`@JsonManagedReference` and `@JsonBackReference`** are used to avoid infinite recursion when serializing the data between users and posts.
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### Error Handling
 
 If a user or post is not found, the API will return a `404 Not Found` error with an appropriate message.
@@ -172,5 +308,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
+
+
+## Conclusion
+
+This Task Management System demonstrates a basic Spring Boot application with JPA and MySQL for managing users and their posts.
 
 
